@@ -174,12 +174,19 @@ def accuracy_score(prediction, real_data, precent=False):
 
 # принимает на вход словарь вида: {'sentence1': 0.011, 'sentence2': 0.6}
 # возвращает sentence1, 0.011 (минимальное значение)
-def choose_minimum_rate_sentence(result:dict):
+def choose_minimum_rate_sentence(result:dict, min_rate=None):
   min_val = 1e4
   for key, value in result.items():
     if value < min_val:
       min_val = value
       sentence = key
+  
+  
+  if min_rate:
+  	if min_val < min_rate:
+  		return sentence, min_val
+  	else:
+  		return None, None
 
   return sentence, min_val
 
@@ -187,14 +194,20 @@ def choose_minimum_rate_sentence(result:dict):
 
 # принимает на вход словарь вида: {'sentence1': 0.011, 'sentence2': 0.6}
 # возвращает sentence2, 0.6 (максимальное значение)
-def choose_max_rate_sentence(result:dict):
-  min_val = -10
+def choose_max_rate_sentence(result:dict, max_rate=None):
+  max_val = -10
   for key, value in result.items():
-    if value > min_val:
-      min_val = value
+    if value > max_val:
+      max_val = value
       sentence = key
+      
+  if max_rate:
+  	if max_val > max_rate:
+  		return sentence, max_val
+  	else:
+  		return None, None  
 
-  return sentence, min_val
+  return sentence, max_val
 
 
 
