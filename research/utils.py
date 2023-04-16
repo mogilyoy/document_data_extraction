@@ -156,7 +156,7 @@ def split_df_texts_by_sentences(data_frame:pd.DataFrame):
 
 
 
-def accuracy_score(prediction, real_data, precent=False):
+def text_accuracy_score(prediction, real_data, precent=False):
     assert len(prediction) == len(real_data), 'Objects must have the same length'
     counter = 0
 
@@ -180,13 +180,13 @@ def choose_minimum_rate_sentence(result:dict, min_rate=None):
     if value < min_val:
       min_val = value
       sentence = key
-  
-  
+
+
   if min_rate:
-  	if min_val < min_rate:
-  		return sentence, min_val
-  	else:
-  		return None, None
+    if min_val < min_rate:
+      return sentence, min_val
+    else:
+      return None, None
 
   return sentence, min_val
 
@@ -202,13 +202,90 @@ def choose_max_rate_sentence(result:dict, max_rate=None):
       sentence = key
       
   if max_rate:
-  	if max_val > max_rate:
-  		return sentence, max_val
-  	else:
-  		return None, None  
+    if max_val > max_rate:
+      return sentence, max_val
+    else:
+      return None, None  
 
   return sentence, max_val
 
 
+def lemmatization(text, stopwords, morph):
+  if text and len(text) > 1:
+    pattern = "[A-Za-z0-9!#$%&'()*+№,./:;<=>?@[\]^_`{|}~—\"\-]+"
+    text = re.sub(pattern, ' ', text)
+    tokens = []
+    for token in text.split():
+        if token and token not in stopwords:
+            token = token.strip()
+            token = morph.normal_forms(token)[0]
+            tokens.append(token)
+    return tokens
+  else: 
+    return None
 
 
+
+def get_word_vectors_from_dataframe(dataframe, navec):
+  df = []
+  for i in range(len(dataframe)):
+    sentence = []
+    for j in range(len(dataframe.loc[i, 'text'])):
+      try:
+        word_embending = navec[dataframe.loc[i, 'text'][j]].mean()
+        sentence.append(word_embending)
+      except:
+        sentence.append(0)
+    df.append(sentence)
+  df = pd.DataFrame(df, dtype='float64')
+  df['target'] = dataframe['target']
+  df.fillna(0, inplace=True)
+  return df
+
+
+def split_df_texts_by_sentences(data_frame:pd.DataFrame):
+  for i in range(len(data_frame)):
+    splitted = splitter(data_frame.loc[i, 'text'])
+    data_frame.at[i, 'text'] = splitted
+  return data_frame
+
+
+
+def lemmatize_splitted_df_sentences(dataframe:pd.DataFrame, stopwords, morph):
+  for i in range(len(dataframe)-1):
+    sentence = []
+    for k in range(len(dataframe.loc[i, 'text'])):
+      lemma = lemmatization(dataframe.loc[i, 'text'][k], stopwords=stopwords, morph=morph)
+      sentence.append(lemma)
+    dataframe.at[i, 'text'] = sentence
+  return dataframe
+
+
+
+def get_sentence_vectors_from_lemmatized_text(text:list, vector_len, navec):
+  vectorized_text = []
+  for i in range(len(text)):
+    sentence = [0 for _ in range(vector_len)]
+    if text[i] and len(text[i]) > vector_len:
+      for k in range(vector_len):
+        try: 
+          word_emdending = navec[text[i][k]].mean()
+          sentence[k] = word_emdending
+        except:
+          sentence[k] = 0
+      vectorized_text.append(sentence)
+
+    elif text[i] is None:
+      vectorized_text.append(sentence)
+      continue
+
+    else: 
+      for k in range(len(text[i])):
+        try: 
+          word_emdending = navec[text[i][k]].mean()
+          sentence[k] = word_emdending
+        except:
+          sentence[k] = 0
+      vectorized_text.append(sentence)
+
+  return vectorized_text

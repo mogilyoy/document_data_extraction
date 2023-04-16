@@ -1,1 +1,3 @@
-data/contract_enforcement_setfit_model.joblib
+data/models/contract_enforcement_setfit_model.joblib
+data/models/contract_enforcement_xgb_model.joblib
+data/models/garantee_enforcement_xgb_model.joblib
