@@ -24,16 +24,18 @@ def is_in_stop_list(word):
 def is_common_target_end(sentence):
   # в стоп листе сохраним падежи, чтобы не генерить много фрагментов
   stop_list = [
-      'контракта', 'нцмд', 'копейки'
+      'контракта', 'нцмд', 'копейки', 'договора', 'рублей', '(цены лота)'
   ]
+
   index_list = []
 
   word_list = sentence.split()
   for word in word_list:
     if word.lower() in stop_list:
-      index_list.append(sentence.index(word) + len(word))
+      index_list.extend([m.start() + len(word) for m in re.finditer(word,  sentence)])
 
-  return index_list
+
+  return list(set(index_list))
 
 
 
