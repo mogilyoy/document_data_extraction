@@ -4,8 +4,8 @@ import re
 
 
 
-# функция возвращает True, если слово на входе часто в трейне пишется с большой буквы 
 def is_in_stop_list(word):
+  # функция возвращает True, если слово на входе часто в трейне пишется с большой буквы 
   stop_list = ['заказчик', 'получател', 'договор', 'поставщик', 
       'федер', 'закон', 'росси', 'гражданск', 
       'министерств', 'директор', 'сторон', 'оборудован', 
@@ -20,8 +20,8 @@ def is_in_stop_list(word):
   return False
 
 
-
 def is_common_target_end(sentence):
+  # возвращает индексы частых окончаний фрагментов
   # в стоп листе сохраним падежи, чтобы не генерить много фрагментов
   stop_list = [
       'контракта', 'нцмд', 'копейки', 'договора', 'рублей', '(цены лота)'
@@ -38,8 +38,8 @@ def is_common_target_end(sentence):
   return list(set(index_list))
 
 
-
 def comma_separate(list_of_sentences, min_sentence_lenght=15):
+  # делит полученный список предложений на фрагменты по запятым, тире и частым окончаниям, возвращает полный список предложений с фрагментами 
   result_fragments_list = []
 
   def separate(sentence):
@@ -69,8 +69,8 @@ def comma_separate(list_of_sentences, min_sentence_lenght=15):
   return result_fragments_list
 
 
-
 def check_the_last_word(list_of_words):
+  # проверяет не является ли последнее слово в предложении знаком > < или небольшим числом
   try: 
     if int(list_of_words[-1]) < 100:
       return list_of_words[:-1]
@@ -80,8 +80,8 @@ def check_the_last_word(list_of_words):
   return list_of_words
 
 
-
 def splitter(text, min_sentence_lenght=6):
+  # функция разделения текстов на предложения и фрагменты, возвращает их список
   list_of_sentences = []
   list_of_words = text.split()
   sentence = []
@@ -131,6 +131,7 @@ def splitter(text, min_sentence_lenght=6):
 
 
 def division_check(df:pd.DataFrame):
+  # подсчитывает качество разделения текстов на фрагменты
   counter = 0
   try:
     df.drop(columns=['not_found'], inplace=True)
@@ -146,11 +147,12 @@ def division_check(df:pd.DataFrame):
     except IndexError:
       print(df.loc[i, 'text'])
       print(i)
-  return counter / 1492, df[df['not_found']==0].reset_index(drop=True)  # 1492 - ненулевые значения в таргете
+  return counter / 1492, df[df['not_found']==0].reset_index(drop=True)  # 1492 - ненулевые значения в трейне
 
 
 
 def split_df_texts_by_sentences(data_frame:pd.DataFrame):
+  # разделяет тексты в датафрейме на предложения, на выходе датафрейм с разделёнными текстами
   for i in range(len(data_frame)-1):
     splitted = splitter(data_frame.loc[i, 'text'])
     data_frame.at[i, 'text'] = splitted
@@ -159,6 +161,7 @@ def split_df_texts_by_sentences(data_frame:pd.DataFrame):
 
 
 def text_accuracy_score(prediction, real_data, precent=False):
+    # счиатет accuracy предсказания
     assert len(prediction) == len(real_data), 'Objects must have the same length'
     counter = 0
 
@@ -174,9 +177,9 @@ def text_accuracy_score(prediction, real_data, precent=False):
 
 
 
-# принимает на вход словарь вида: {'sentence1': 0.011, 'sentence2': 0.6}
-# возвращает sentence1, 0.011 (минимальное значение)
 def choose_minimum_rate_sentence(result:dict, min_rate=None):
+  # принимает на вход словарь вида: {'sentence1': 0.011, 'sentence2': 0.6} 
+  # возвращает sentence1, 0.011 (минимальное значение)
   min_val = 1e4
   for key, value in result.items():
     if value < min_val:
@@ -194,9 +197,9 @@ def choose_minimum_rate_sentence(result:dict, min_rate=None):
 
 
 
-# принимает на вход словарь вида: {'sentence1': 0.011, 'sentence2': 0.6}
-# возвращает sentence2, 0.6 (максимальное значение)
 def choose_max_rate_sentence(result:dict, max_rate=None):
+  # принимает на вход словарь вида: {'sentence1': 0.011, 'sentence2': 0.6}
+  # возвращает sentence2, 0.6 (максимальное значение)
   max_val = -10
   for key, value in result.items():
     if value > max_val:
@@ -213,6 +216,7 @@ def choose_max_rate_sentence(result:dict, max_rate=None):
 
 
 def lemmatization(text, stopwords, morph):
+  # предит предложения в список токенов
   if text and len(text) > 1:
     pattern = "[A-Za-z0-9!#$%&'()*+№,./:;<=>?@[\]^_`{|}~—\"\-]+"
     text = re.sub(pattern, ' ', text)
@@ -229,6 +233,7 @@ def lemmatization(text, stopwords, morph):
 
 
 def get_word_vectors_from_dataframe(dataframe, navec):
+  # переводит лемматизированный датафрейм в датафейм из векторов предложенний, возвращает датафрейм текстов из векторов предложений
   df = []
   for i in range(len(dataframe)):
     sentence = []
@@ -246,6 +251,7 @@ def get_word_vectors_from_dataframe(dataframe, navec):
 
 
 def split_df_texts_by_sentences(data_frame:pd.DataFrame):
+  # делит тексты датафрейма функцией splitter
   for i in range(len(data_frame)):
     splitted = splitter(data_frame.loc[i, 'text'])
     data_frame.at[i, 'text'] = splitted
@@ -254,6 +260,11 @@ def split_df_texts_by_sentences(data_frame:pd.DataFrame):
 
 
 def lemmatize_splitted_df_sentences(dataframe:pd.DataFrame, stopwords, morph):
+  """
+  приводит разделённые тексты датафрема к формату: 
+  [['не', 'установить'], ['обеспечение', 'заявка'], ['обеспечение', 'исполнение', 'контракт']]
+  возвращает датафрейм
+  """
   for i in range(len(dataframe)-1):
     sentence = []
     for k in range(len(dataframe.loc[i, 'text'])):
@@ -265,6 +276,7 @@ def lemmatize_splitted_df_sentences(dataframe:pd.DataFrame, stopwords, morph):
 
 
 def get_sentence_vectors_from_lemmatized_text(text:list, vector_len, navec):
+  # переводит лемматизированный текст в список векторов заданной длины для применения модели
   vectorized_text = []
   for i in range(len(text)):
     sentence = [0 for _ in range(vector_len)]
@@ -295,6 +307,7 @@ def get_sentence_vectors_from_lemmatized_text(text:list, vector_len, navec):
 
 
 def get_extracted_part_from_dataset(dataframe, predictions):
+  # формирует extracted_part для предсказания модели
   result = []
 
   # пробегаем по предсказанным предложениям
